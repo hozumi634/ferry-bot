@@ -1,7 +1,7 @@
 from flask import Flask, request
 import requests
 from datetime import datetime
-import osu8HVoZLtKf4hKDsGYshkuCuty5QK1Fvk8kQyVdq5YG
+import os
 app = Flask(__name__)
 
 
