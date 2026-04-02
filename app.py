@@ -1,10 +1,11 @@
 from flask import Flask, request
 import requests
 from datetime import datetime
-
+import osu8HVoZLtKf4hKDsGYshkuCuty5QK1Fvk8kQyVdq5YG
 app = Flask(__name__)
 
-ACCESS_TOKEN = "u8HVoZLtKf4hKDsGYshkuCuty5QK1Fvk8kQyVdq5YGo0b1F89fKqTa547BrWbCvaeO3h4LxewsIlQHCUpJ87EVP+ds0qw0UQhfir/g/OAq4lVHpf+VwQCUVXqp+F7hDaSc7VZ3xWDKaiSnR2jGby7AdB04t89/1O/w1cDnyilFU="
+
+ACCESS_TOKEN = "o0b1F89fKqTa547BrWbCvaeO3h4LxewsIlQHCUpJ87EVP+ds0qw0UQhfir/g/OAq4lVHpf+VwQCUVXqp+F7hDaSc7VZ3xWDKaiSnR2jGby7AdB04t89/1O/w1cDnyilFU="
 
 # 竹原 → 大崎上島
 takehara = [
@@ -35,19 +36,21 @@ kamijima = [
 ("20:00","白水"),("21:05","垂水")
 ]
 
+# 次の便を探す
 def find_next(now, data):
     for t, port in data:
         if t > now:
             return t, port
     return data[0]
 
+# 分計算
 def minutes_diff(now_str, target_str):
     fmt = "%H:%M"
     now = datetime.strptime(now_str, fmt)
     target = datetime.strptime(target_str, fmt)
     diff = (target - now).total_seconds() / 60
     if diff < 0:
-        diff += 24*60
+        diff += 24 * 60
     return int(diff)
 
 @app.route("/webhook", methods=["POST"])
@@ -61,7 +64,6 @@ def webhook():
 
         now = datetime.now().strftime("%H:%M")
 
-        # 判定
         if "竹原" in text:
             t, port = find_next(now, takehara)
             diff = minutes_diff(now, t)
@@ -71,15 +73,22 @@ def webhook():
             diff = minutes_diff(now, t)
             msg = f"次は {t}発（{port}発）です。あと約{diff}分"
 
-        # LINEに返信
-        requests.post( "https://api.line.me/v2/bot/message/reply", headers={"Authorization": f"Bearer {ACCESS_TOKEN}"},
-            json={"replyToken": reply_token,"messages":[{"type":"text","text":msg}] } )
+        requests.post(
+            "https://api.line.me/v2/bot/message/reply",
+            headers={
+                "Authorization": f"Bearer {ACCESS_TOKEN}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "replyToken": reply_token,
+                "messages": [
+                    {"type": "text", "text": msg}
+                ]
+            }
+        )
 
     return "OK"
-import os
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
-
